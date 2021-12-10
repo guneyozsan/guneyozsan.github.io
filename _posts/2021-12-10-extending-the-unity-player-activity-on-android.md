@@ -1,5 +1,7 @@
 ﻿# Extending the UnityPlayerActivity on Android
 
+You can find the resulting project of this guide here on my Github collection [Unity Good Practices](https://github.com/guneyozsan/UnityGoodPractices).
+
 **Note:** This process is specific to the *Android* platform and not applicable to other platforms.
 
 On Android, it is possible to extend `UnityPlayerActivity` to override existing interactions between Unity and Android OS or introduce new behaviors.
@@ -18,7 +20,7 @@ The whole idea is to mock `com.unity3d.player.UnityPlayerActivity;` by including
 
 ## Step-by-step guide
 
-You can use the project provided as a template, or follow this guide to start fresh.
+You can use [the project provided](https://github.com/guneyozsan/UnityGoodPractices) as a template, or follow this guide to start fresh.
 
 ### 1) Create your activity
 
