@@ -1,4 +1,10 @@
-﻿# Extending the UnityPlayerActivity on Android
+﻿---
+layout: post
+title: Extending the UnityPlayerActivity on Android
+categories: [Unity, Android, Development, Tutorials, Guides]
+---
+
+# Extending the UnityPlayerActivity on Android
 
 You can find the resulting project of this guide here on my Github collection [Unity Good Practices](https://github.com/guneyozsan/UnityGoodPractices).
 
