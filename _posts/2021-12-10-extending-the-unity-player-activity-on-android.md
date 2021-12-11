@@ -12,6 +12,20 @@ categories: [Unity, Android, Development, Tutorials, Guides]
 
 This project allows you to extend `UnityPlayerActivity` in an isolated source-control friendly Android Studio project, without a need to work on the exported Android Studio project of your game. It also removes the need to copy, maintain (and even worse, include) the file `classes.jar` from the Unity installation.
 
+## Table of contents
+
+- [Background](#background)
+- [Guide](#guide)
+    * [Android Studio](#android-studio)
+        + [Create your activity](#create-your-activity)
+        + [Mock Unity activity](#mock-unity-activity)
+        + [Extend Unity activity](#extend-unity-activity)
+        + [Export plugin from Android Studio](#export-plugin-from-android-studio)
+    * [Unity](#unity)
+        + [Import plugin to Unity](#import-plugin-to-unity)
+        + [Run on device](#run-on-device)
+- [Further improvements](#further-improvements)
+
 ## Background
 
 On Android, it is possible to extend `UnityPlayerActivity` to override existing interactions between Unity and Android OS or introduce new behaviors.
@@ -24,7 +38,7 @@ The common methods to extend UnityPlayerActivity are:
 
 - The suggested method in Unity documentation is to extend *UnityPlayerActivity* is to open the exported Android project in Android Studio, and do modifications from there. However, this method may introduce friction and difficulties in workflow, such as difficulty in source control of the extension plugin, and maintaining other modules/plugins that you may want to introduce.
 
-- Another method suggested around the web is to manually copy `classes.jar` from the Unity directory to your working directory. However, this requires including the `classes.jar`file within the plugin, or needs extra effort to exclude it from builds.
+- Another method suggested around the web is to manually copy `classes.jar` from the Unity directory to your working directory. However, this requires including the `classes.jar` file within the plugin, or needs extra effort to exclude it from builds.
 
 On the other hand, with this method, you can have an isolated Android Studio project for your Unity plugin, by referencing the Unity classes without a need to copy and maintain `classes.jar`, and keeping the reference `import com.unity3d.player.UnityPlayerActivity;` intact.
 
@@ -75,7 +89,7 @@ This project was created using *Android Studio Arctic Fox 2020.3.1*.
         1. Paste the simplified mock content into `UnityPlayerActivity.java` you created:
 
            ```c#
-           // This is a stripped of version of the Unity file `UnityPlayerActivity.java`.
+           // This is a stripped-off version of the Unity file `UnityPlayerActivity.java`.
            // Original file is not included to prevent licensing issues.
            //
            // If you ever need a specific usage, you can copy the original file from
@@ -184,10 +198,10 @@ Open your Unity project.
 
 #### Run on device
 
-1. In Unity, make sure *Android* platform is selected in `Build Settings`.
+1. In Unity, make sure the *Android* platform is selected in `Build Settings`.
 2. Use `Build Settings/Build And Run` to run the application on a connected Android device.
 3. If you used build variant `debug` while building the plugin in Android Studio, you should see the demo log `Running MyUnityPlayerActivity.` from overridden `onCreate()` in `adb logcat` (e.g. by running `adb logcat -s Unity` in command prompt, or by using Android Logcat package in Unity).
 
-### Further improvements
+## Further improvements
 
 - Exporting Android Studio build and copying the built plugin into the Unity project can be automated for even a smoother workflow.
