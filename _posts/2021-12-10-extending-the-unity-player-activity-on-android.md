@@ -6,9 +6,13 @@ categories: [Unity, Android, Development, Tutorials, Guides]
 
 # Extending the UnityPlayerActivity on Android
 
-You can find the resulting project of this guide here on my Github collection [Unity Good Practices](https://github.com/guneyozsan/UnityGoodPractices).
+***Note:*** *This process is specific to the **Android** platform and not applicable to other platforms.*
 
-**Note:** This process is specific to the *Android* platform and not applicable to other platforms.
+*You can find the resulting project of this guide here on my Github collection [Unity Good Practices](https://github.com/guneyozsan/UnityGoodPractices).*
+
+This project allows you to extend `UnityPlayerActivity` in an isolated source-control friendly Android Studio project, without a need to work on the exported Android Studio project of your game. It also removes the need to copy, maintain (and even worse, include) the file `classes.jar` from the Unity installation.
+
+## Background
 
 On Android, it is possible to extend `UnityPlayerActivity` to override existing interactions between Unity and Android OS or introduce new behaviors.
 
@@ -16,19 +20,27 @@ From [the Unity documentation](https://docs.unity3d.com/Manual/AndroidUnityPlaye
 
 > When you develop a Unity Android application, you can use plug-ins to extend the standard UnityPlayerActivity class (the primary Java class for the Unity Player on Android, similar to AppController.mm on Unity iOS). An application can override all basic interactions between the Android OS and the Unity Android application.
 
-The suggested method in Unity documentation is to extend *UnityPlayerActivity* is to open the exported Android project in Android Studio, and do modifications from there. However, this method may introduce friction and difficulties in workflow, such as maintaining an isolated repository for the extension plugin and maintaining other modules that you may want to introduce.
+The common methods to extend UnityPlayerActivity are:
 
-Another manual method suggested around the web is to copy `classes.jar` from the Unity directory to your working directory. However, this requires including the classes.jar within the plugin or needs extra effort to exclude it from builds.
+- The suggested method in Unity documentation is to extend *UnityPlayerActivity* is to open the exported Android project in Android Studio, and do modifications from there. However, this method may introduce friction and difficulties in workflow, such as difficulty in source control of the extension plugin, and maintaining other modules/plugins that you may want to introduce.
+
+- Another method suggested around the web is to manually copy `classes.jar` from the Unity directory to your working directory. However, this requires including the `classes.jar`file within the plugin, or needs extra effort to exclude it from builds.
 
 On the other hand, with this method, you can have an isolated Android Studio project for your Unity plugin, by referencing the Unity classes without a need to copy and maintain `classes.jar`, and keeping the reference `import com.unity3d.player.UnityPlayerActivity;` intact.
 
 The whole idea is to mock `com.unity3d.player.UnityPlayerActivity;` by including a *compile-only* module for `UnityPlayerActivity`. This way you can work on a fresh isolated Android Studio project as if you are working on an exported Android Studio project.
 
-## Step-by-step guide
+## Guide
 
-You can use [the project provided](https://github.com/guneyozsan/UnityGoodPractices) as a template, or follow this guide to start fresh.
+You can use [the project created with this method](https://github.com/guneyozsan/UnityGoodPractices) as a starting point, or follow this guide to start fresh.
 
-### 1) Create your activity
+It is suggested create the project from scratch if you are using a significantly newer version of Android Studio, or you would like to keep the references of the tests removed.
+
+This project was created using *Android Studio Arctic Fox 2020.3.1*.
+
+### Android Studio
+
+#### Create your activity
 
 1. In Android Studio create a new project with *"No activity"*.
     1. Use package name that matches your Unity project `com.mycompany.myunityproject.player` (e.g. `com.awesomegamestudio.veryfungame.player`).
@@ -48,15 +60,13 @@ You can use [the project provided](https://github.com/guneyozsan/UnityGoodPracti
 
        ```js
        dependencies {
-           compileOnly files('C:/Program Files/Unity/Hub/Editor/2019.4.33f1/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/mono/Release/Classes/classes.jar)
+           compileOnly files('C:/Program Files/Unity/Hub/Editor/YOUR_UNITY_VERSION/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/mono/Release/Classes/classes.jar)
        }
        ```
 
-       *NOTE: Unity version in URLs should match yours.*
+       *NOTE: Unity version in URLs should match yours. You only need to update this if you need to modify the plugin with a newer Unity installation.*
 
-       *NOTE: You only need to update the Unity version number when you want to modify the extension plugin. Builds are independent of this dependency and will be using the reference from the Unity version that they were imported.*
-
-### 2) Mock Unity activity
+#### Mock Unity activity
 
 1. From `File/New/New Module`, create a new **module** with package name `com.unity3d.player`.
 2. Perform the same steps above (Create your activity) for this module as well (clean-up and adding local Unity dependency).
@@ -65,12 +75,20 @@ You can use [the project provided](https://github.com/guneyozsan/UnityGoodPracti
         1. Paste the simplified mock content into `UnityPlayerActivity.java` you created:
 
            ```c#
+           // This is a stripped of version of the Unity file `UnityPlayerActivity.java`.
+           // Original file is not included to prevent licensing issues.
+           //
+           // If you ever need a specific usage, you can copy the original file from
+           // `C:\Program Files\Unity\Hub\Editor\YOUR_UNITY_VERSION\Editor\Data\PlaybackEngines\AndroidPlayer\src\com\unity3d\player`.
+
            package com.unity3d.player;
            
            import android.app.Activity;
            
            public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecycleEvents
            {
+               protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
+           
                // When Unity player unloaded move task to background
                @Override public void onUnityPlayerUnloaded() {
                }
@@ -81,19 +99,19 @@ You can use [the project provided](https://github.com/guneyozsan/UnityGoodPracti
            }
            ```
 
-        2. Or, in order to access original functionality, copy `UnityPlayerActivity.java` from `C:\Program Files\Unity\Hub\Editor\2019..4.33f1\Editor\Data\PlaybackEngines\AndroidPlayer\src\com\unity3d\player\` to `/player/java/com/unity3d/player/`.
+        2. Or, in order to access original functionality, or use a more recent version of the file, copy `UnityPlayerActivity.java` from `C:\Program Files\Unity\Hub\Editor\2019..4.33f1\Editor\Data\PlaybackEngines\AndroidPlayer\src\com\unity3d\player\` to `/player/java/com/unity3d/player/`.
 4. In `build.gradle` of module `MyUnityPlayerActivity` add a compile-only dependency to the module `player` we just created.
 
    ```js
    dependencies {
-       compileOnly files('C:/Program Files/Unity/Hub/Editor/2019.4.33f1/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/mono/Release/Classes/classes.jar)
+       compileOnly files('C:/Program Files/Unity/Hub/Editor/YOUR_UNITY_VERSION/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/mono/Release/Classes/classes.jar)
        compileOnly project(':player')
    }
    ```
 
-    * NOTE: Unity version in URLs should match yours.*
+   *NOTE: Unity version in URLs should match yours. You only need to update this if you need to modify the plugin with a newer Unity installation.*
 
-### 3) Extend Unity activity
+#### Extend Unity activity
 
 1. Create new class `MyUnityPlayerActivity` in `app/java/com.mycompany.myunityproject.player` with this content:
 
@@ -108,7 +126,8 @@ You can use [the project provided](https://github.com/guneyozsan/UnityGoodPracti
    public class MyUnityPlayerActivity extends UnityPlayerActivity {
       private static final String TAG = "Unity";
 
-      // Overriding `onCreate()` is only for demo purposes, and not required for extending the Unity activity.
+      // This override is not required for extending the UnityPlayerActivity.
+      // It is included to test configuration on a device.
       @Override
       protected void onCreate(Bundle savedInstanceState) {
          super.onCreate(savedInstanceState);
@@ -119,12 +138,16 @@ You can use [the project provided](https://github.com/guneyozsan/UnityGoodPracti
 
    *NOTE: Overriding `onCreate()` is only for demo purposes, and not required for extending the Unity activity.*
 
-### 4) Export plugin from Android Studio
+#### Export plugin from Android Studio
 
 1. Select build variant `debug` or `release` from `Build/Select Build Variant...`. *(Use build variant `debug` to see the logs in logcat.)*
 2. In Android Studio `Build/Make` will build `.aar` to `/app/build/outputs/aar/app-release.aar`.
 
-### 5) Import plugin to Unity
+### Unity
+
+Open your Unity project.
+
+#### Import plugin to Unity
 1. Copy the `.aar` file built in previous step to Unity project into the folder `Assets/Plugins/Android/libs/MyUnityPlayerActivity/`.
 2. Customize Unity AndroidManifest *(need to be done only once)*:
     1. Enable `Custom Main Manifest` at `Project Settings/Player/Publishing Settings/Build`.
@@ -133,21 +156,33 @@ You can use [the project provided](https://github.com/guneyozsan/UnityGoodPracti
        to `<activity android:name="com.mycompany.myunityproject.player.MyUnityPlayerActivity" ... >`.
 3. If you introduced any *non-compile-only* dependencies in `build.gradle (app)` of MyUnityPlayerActivity:
     1. Create a file `/Assets/MyUnityPlayerActivity/Editor/MyUnityPlayerActivityDependencies.xml`.
-    2. Declare the dependencies in this file using the format below.
+   2. Declare those dependencies in this file using the format below.
+
+      For example, if your `build.gradle (app)` looks like this:
+
+      ```js
+      dependencies {
+          implementation 'androidx.appcompat:appcompat:1.3.1'
+          implementation 'com.google.android.gms:play-services-auth:19.2.0'
+
+          //noinspection GradlePath
+          compileOnly files('C:/Program Files/Unity/Hub/Editor/2019.4.33f1/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/mono/Release/Classes/classes.jar')
+          compileOnly project(':player')
+      }
+      ```
+
+      Then your `MyUnityPlayerActivityDependencies.xml` should look like this:
+      ```xml
+      <dependencies>
+          <androidPackages>
+              <androidPackage spec="androidx.appcompat:appcompat:1.3.1"/>
+              <androidPackage spec="com.google.android.gms:play-services-auth:19.2.0"/>
+          </androidPackages>
+      </dependencies>
+      ```
     3. Use [External Dependency Manager for Unity](https://github.com/googlesamples/unity-jar-resolver) to resolve dependencies.
 
-       Example `MyUnityPlayerActivityDependencies.xml`:
-       ```xml
-       <dependencies>
-           <androidPackages>
-               <androidPackage spec="androidx.appcompat:appcompat:1.3.1"/>
-               <androidPackage spec="com.google.android.gms:play-services-auth:19.2.0"/>
-               ...
-           </androidPackages>
-       </dependencies>
-       ```
-
-### 6) Run on device
+#### Run on device
 
 1. In Unity, make sure *Android* platform is selected in `Build Settings`.
 2. Use `Build Settings/Build And Run` to run the application on a connected Android device.
