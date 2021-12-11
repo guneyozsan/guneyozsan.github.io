@@ -12,6 +12,20 @@ categories: [Unity, Android, Development, Tutorials, Guides]
 
 This project allows you to extend `UnityPlayerActivity` in an isolated source-control friendly Android Studio project, without a need to work on the exported Android Studio project of your game. It also removes the need to copy, maintain (and even worse, include) the file `classes.jar` from the Unity installation.
 
+## Table of contents
+
+- [Background](#background)
+- [Guide](#guide)
+    * [Android Studio](#android-studio)
+        + [Create your activity](#create-your-activity)
+        + [Mock Unity activity](#mock-unity-activity)
+        + [Extend Unity activity](#extend-unity-activity)
+        + [Export plugin from Android Studio](#export-plugin-from-android-studio)
+    * [Unity](#unity)
+        + [Import plugin to Unity](#import-plugin-to-unity)
+        + [Run on device](#run-on-device)
+- [Further improvements](#further-improvements)
+
 ## Background
 
 On Android, it is possible to extend `UnityPlayerActivity` to override existing interactions between Unity and Android OS or introduce new behaviors.
